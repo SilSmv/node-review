@@ -40,4 +40,21 @@ https://http.cat/
 ```bash
 npm install express -E
 ```
+## Validate values 
+```bash 
+npm install zod -E
+```
+## Gaves you an url for your static web 
+```bash 
+npx servor folderName
+```
+for example, for project class-3, you should run it with 
+```bash
+npx servor ./web
+```
+
+## Middleware for cors 
+```bash
+npm install cors -E
+```
 
