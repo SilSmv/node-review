@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        button:hover {
+            background-color: #218838;
+        }
+        .form-container {
+            margin: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .form-container h2 {
+            margin-bottom: 10px;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <% if (typeof username !== 'undefined') { %>
+            <!-- Panel de administración cuando el usuario está logueado -->
+            <div class="form-container">
+                <h2>Hola <%= username %>!</h2>
+                <p>Estás en el panel de administración.</p>
+                <button id="close-session">Cerrar sesión</button>
+            </div>
+        <% } else { %>
+            <!-- Formulario de login y registro cuando no hay un usuario logueado -->
+            <div class="form-container">
+                <form id="login-form">
+                    <h2>Login</h2>
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" name="username" required>
+                    
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" name="password" required>
+                    
+                    <button type="submit">Login</button>
+                    <span>&nbsp;</span>
+                </form>
+            </div>
+
+            <div class="form-container">
+                <form id="register-form">
+                    <h2>Register</h2>
+                    <label for="register-username">Username</label>
+                    <input type="text" id="register-username" name="username" required>
+                    
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" name="password" required>
+                    
+                    <label for="register-confirm-password">Confirm Password</label>
+                    <input type="password" id="register-confirm-password" name="confirm-password" required>
+                    
+                    <button type="submit">Register</button>
+                    <span>&nbsp;</span>
+                </form>
+            </div>
+        <% } %>
+    </div>
+
+    <script>
+        const $ = el => document.querySelector(el);
+
+        const loginForm = $('#login-form');
+        const loginSpan = $('#login-form span');
+
+        const registerForm = $('#register-form');
+        const registerSpan = $('#register-form span');
+
+        const logoutButton = $('#close-session');
+
+        // Evento para cerrar sesión
+        logoutButton?.addEventListener('click', () => {
+            fetch('/logout', { method: 'POST' })
+                .then(res => {
+                    if (res.ok) {
+                        window.location.href = '/'; // Redirige a la página principal
+                    } else {
+                        alert('Error al cerrar sesión');
+                    }
+                });
+        });
+
+        // Envío del formulario de login
+        loginForm?.addEventListener('submit', e => {
+            e.preventDefault();
+            const username = $('#login-username').value;
+            const password = $('#login-password').value;
+
+            fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(res => {
+                if (res.ok) {
+                    loginSpan.innerText = 'Sesión iniciada... Entrando...';
+                    loginSpan.style.color = 'green';
+                    setTimeout(() => {
+                        window.location.href = '/protected'; // Redirige al panel de administración
+                    }, 2000);
+                } else {
+                    loginSpan.innerText = 'Error al iniciar sesión';
+                    loginSpan.style.color = 'red';
+                }
+            });
+        });
+
+        // Puedes agregar el manejo del registro aquí de manera similar si lo necesitas
+    </script>
+</body>
+</html>
