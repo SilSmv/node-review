@@ -15,12 +15,24 @@ rutas protegidas
 ```bash
 npm install db-local
 ```
+
+## Encrypt data
+```bash
 npm install bcrypt
+```
+
+## Template to render
 
 https://ejs.co/
 
+```bash 
 npm install ejs 
+```
 
- npm install jsonwetoken
+## Token 
+ 
+npm install jsonwetoken
 
- npm install cookie-parser
+## Cookies
+
+npm install cookie-parser

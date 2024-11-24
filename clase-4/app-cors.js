@@ -2,8 +2,8 @@ import express, { json } from 'express'
 // import movies from './movies.json' assert {type:'json'} //ya no existe esta sintaxis
 // import movies from './movies.json' with  {type:'json'} //no la soporta
 
-import cors from 'cors'
-import { moviesRouter } from './routes/movies'
+import { moviesRouter } from './routes/movies.js'
+import { corsMiddleware } from './middlewares/cors.js'
 
 // import fs from 'node:fs'
 // const movies = JSON.parse(fs.readFileSync('./movies.json', 'utf-8'))
@@ -11,22 +11,7 @@ import { moviesRouter } from './routes/movies'
 const app = express()
 app.disable('x-powered-by')
 app.use(json())
-app.use(cors({
-  origin: (origin, callback) => {
-    const ACCEPTED_ORIGINS = [
-      'http://localhost:8080',
-      'http://localhost:1234',
-      'http://movies.com'
-    ]
-    if (ACCEPTED_ORIGINS.includes(origin)) {
-      return callback(null, true)
-    }
-    if (!origin) {
-      return callback(null, true)
-    }
-    return callback(new Error('Not allowed by Cors'))
-  }
-}))
+app.use(corsMiddleware())
 
 // normal methods get/head/post
 // complex methods put/patch/delete
