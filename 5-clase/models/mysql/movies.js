@@ -63,11 +63,18 @@ export class MovieModel {
       'SELECT title,year,director, duration,poster,rate, BIN_TO_UUID(id) id FROM movie WHERE id = UUID_TO_BIN(?)',
       [uuid]
     )
+
     return movies
   }
 
   static async delete ({ id }) {
-
+    try {
+      await connection.query(
+        'DELETE from movie  where id =  UUID_TO_BIN(?)'
+        , [id])
+    } catch (error) {
+      throw new Error('Error creating movie')
+    }
   }
 
   static async update ({ id, input }) {
