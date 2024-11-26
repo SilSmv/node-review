@@ -22,12 +22,18 @@ export class MovieModel {
       const [{ id }] = genres
 
       const [moviesGenres] = await connection.query(
-        'SELECT m.title,m.year,m.director, m.duration,m.poster,m.rate,BIN_TO_UUID(m.id) id FROM movie m JOIN movie_genres mg ON mg.movie_id = m.id WHERE mg.genre_id = ? ',
-        [id])
+        `SELECT BIN_TO_UUID(m.id) id, m.title, m.year, GROUP_CONCAT(g.name)
+         AS genre FROM movie m 
+         JOIN movie_genres mg ON m.id = mg.movie_id
+         JOIN genre g ON mg.genre_id = g.id WHERE g.id = ? GROUP BY m.id`, [id]
+      )
       return moviesGenres
     }
     const [movies] = await connection.query(
-      'SELECT title,year,director, duration,poster,rate, BIN_TO_UUID(id) id FROM movie'
+      `SELECT BIN_TO_UUID(m.id) id, m.title, m.year, GROUP_CONCAT(g.name)
+       AS genre FROM movie m 
+       JOIN movie_genres mg ON m.id = mg.movie_id
+       JOIN genre g ON mg.genre_id = g.id GROUP BY m.id`
     )
     return movies
   }
@@ -37,7 +43,13 @@ export class MovieModel {
       'SELECT title,year,director, duration,poster,rate, BIN_TO_UUID(id) id FROM movie WHERE id = UUID_TO_BIN(?)',
       [id]
     )
-    return movies
+    const [genres] = await connection.query('SELECT g.name FROM genre g JOIN movie_genres mg ON  mg.genre_id = g.id WHERE mg.movie_id = UUID_TO_BIN(?)', [id])
+    console.log(movies)
+    if (movies.length > 0) {
+      const genre = genres.map(item => item.name)
+
+      return { ...movies[0], genre }
+    } else return {}
   }
 
   static async create ({ input }) {
@@ -70,7 +82,7 @@ export class MovieModel {
   static async delete ({ id }) {
     try {
       await connection.query(
-        'DELETE from movie  where id =  UUID_TO_BIN(?)'
+        'DELETE FROM movie  where id =  UUID_TO_BIN(?)'
         , [id])
     } catch (error) {
       throw new Error('Error creating movie')
@@ -78,6 +90,15 @@ export class MovieModel {
   }
 
   static async update ({ id, input }) {
+    const [movies] = await connection.query(
+      'SELECT title,year,director, duration,poster,rate, BIN_TO_UUID(id) id FROM movie WHERE id = UUID_TO_BIN(?)',
+      [id]
+    )
+    const movieUpdated = { ...movies[0], ...input }
+    await connection.query(
+      'UPDATE movie SET title = ?,year = ? ,director = ?, duration =? ,poster =?,rate =? WHERE id = UUID_TO_BIN(?)',
+      [movieUpdated.title, movieUpdated.year, movieUpdated.director, movieUpdated.duration, movieUpdated.poster, movieUpdated.rate, id]
 
+    )
   }
 }
